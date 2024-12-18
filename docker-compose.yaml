@@ -1,0 +1,117 @@
+services: 
+  apache-nifi:
+    hostname: apache-nifi
+    image: apache/nifi:latest
+    container_name: apache-nifi
+    ports:
+      - "8443:8443"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.95"
+          memory: 4G
+    restart: on-failure
+    environment:
+      - SINGLE_USER_CREDENTIALS_USERNAME=nifi
+      - SINGLE_USER_CREDENTIALS_PASSWORD=HGd15bvfv8744ghbdhgdv7895agqERAo
+      - TZ=America/Sao_Paulo
+    healthcheck:
+      test: wget -q --spider http://apache-nifi:8443/nifi-api/system-diagnostics || exit 1
+      interval: 60s
+      timeout: 40s
+      retries: 3
+    volumes: 
+      - ./nifi/jdbc:/opt/nifi/nifi-current/jdbc
+      - nifi-logs:/opt/nifi/nifi-current/logs
+      - nifi-conf:/opt/nifi/nifi-current/conf
+      - nifi-state:/opt/nifi/nifi-current/state
+      - nifi-content:/opt/nifi/nifi-current/content_repository
+      - nifi-database:/opt/nifi/nifi-current/database_repository
+      - nifi-flowfile:/opt/nifi/nifi-current/flowfile_repository
+      - nifi-provenance:/opt/nifi/nifi-current/provenance_repository
+    networks:
+      - satoshi-signal-network
+  
+  postgres:
+    image: pgduckdb/pgduckdb:16-main
+    container_name: postgres
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      - postgresql_bin:/usr/lib/postgresql
+      - ./cripto_table.sql:/docker-entrypoint-initdb.d/cripto_table.sql
+    environment:
+      - POSTGRES_DB=${DB_NAME_PROD} 
+      - POSTGRES_USER=${DB_USER_PROD}
+      - POSTGRES_PASSWORD=${DB_PASS_PROD}
+      - ./files:/files
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    networks:
+      - satoshi-signal-network
+  
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL} 
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD} 
+      - PGADMIN_LISTEN_PORT=5050
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin_root_prefs:/root/.pgadmin
+      - pgadmin_working_dir:/var/lib/pgadmin
+      - postgresql_bin:/usr/lib/postgresql
+      - ./files:/files
+    ports:
+      - "5050:5050"
+    depends_on:
+      - postgres
+    networks:
+      - satoshi-signal-network
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    restart: always
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${DB_NAME_PROD}
+      - DB_POSTGRESDB_USER=${DB_USER_PROD}
+      - DB_POSTGRESDB_PASSWORD=${DB_PASS_PROD}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+    ports:
+      - 5678:5678
+    links:
+      - postgres
+    volumes:
+      - n8n_storage:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - satoshi-signal-network
+
+volumes:
+  nifi-logs:
+  nifi-conf:
+  nifi-state:
+  nifi-content:
+  nifi-database:
+  nifi-flowfile:
+  nifi-provenance:
+  postgresql_data:
+  postgresql_bin:
+  pgadmin_root_prefs:
+  pgadmin_working_dir:
+  n8n_storage:
+
+networks:
+ satoshi-signal-network:
+    driver: bridge
