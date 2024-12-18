@@ -66,22 +66,22 @@ Este projeto tem como objetivo enviar **alertas automatizados** para **WhatsApp*
 
 ---
 
-## 🛠️ **Configurações**
+## **Configurações**
 - **API Coinbase**: Certifique-se de ter acesso à API de preços.  
 - **Credenciais OpenAI**: Configure a chave de API para a geração de mensagens.
 - **Telegram/WhatsApp**: Configure os bots e tokens necessários para envio de mensagens.
 
 ---
 
-## 📈 **Benefícios**
-- ⚡ **Tempo Real**: Alertas instantâneos assim que o preço ultrapassa máximas semanais.
-- 🤖 **Análises Automatizadas**: Insights gerados com IA baseados nos dados coletados.
-- 📊 **Escalabilidade**: Uso de PostgreSQL com pg_duckdb para consultas analíticas otimizadas.
-- 🐳 **Orquestração Simples**: Contêineres Docker facilitam o setup e a execução.
+## **Benefícios**
+- **Tempo Real**: Alertas instantâneos assim que o preço ultrapassa máximas semanais.
+- **Análises Automatizadas**: Insights gerados com IA baseados nos dados coletados.
+- **Escalabilidade**: Uso de PostgreSQL com pg_duckdb para consultas analíticas otimizadas.
+- **Orquestração Simples**: Contêineres Docker facilitam o setup e a execução.
 
 ---
 
-## 📬 **Exemplo de Mensagem Enviada**
+## **Exemplo de Mensagem Enviada**
 ```plaintext
 🚨 Alerta Cripto! 🚨
 O preço do BTC acaba de superar a máxima semanal! 📈
@@ -96,4 +96,4 @@ O preço do BTC acaba de superar a máxima semanal! 📈
 
 ---
 
-Contribuições são bem-vindas! Abra um **Pull Request** ou reporte problemas na aba **Issues**. 🚀# satoshi-signal
+Contribuições são bem-vindas! Abra um **Pull Request** ou reporte problemas na aba **Issues**. 🚀
